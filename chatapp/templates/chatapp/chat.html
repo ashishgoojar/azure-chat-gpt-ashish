@@ -1,0 +1,155 @@
+<!-- chatapp/templates/chatapp/chat.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with GPT</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        #navbar {
+            background: linear-gradient(to right, #4CAF50, #45a049);
+            padding: 10px;
+            color: #fff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            /*  justify-content: space-between; */
+        }
+
+        #navbar img {
+            height: 60px;
+            margin-right: 10px;
+        }
+
+        #navbar-title {
+            float: left;
+            margin: 0;
+        }
+
+        #chat-container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        #chat-display {
+            overflow-y: auto;
+            max-height: 300px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #user-input {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #send-button {
+            width: 100%;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #45a049;
+        }
+
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            }
+
+            li {
+            float: left;
+            }
+
+            li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            }
+
+            li a:hover:not(.active) {
+            background-color: #111;
+            }
+
+            .active {
+            background-color: #45a049;
+            }
+    </style>
+</head>
+<body>
+    <div id="navbar">
+        <img src="{% static 'img/logo.png' %}" alt="Logo">
+        <h1 id="navbar-title">BOTASH</h1>
+        <!-- <ul>
+            <li>ChatApp</li> -->
+            <!-- Add more apps as needed -->
+        <!-- </ul> -->
+    </div>
+<div id="ul">
+    <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#news">News</a></li>
+        <li><a class="active" href="#ChatApp">ChatApp</a></li>
+        <li><a href="#about">About</a></li>
+      </ul>
+</div>
+    <div id="chat-container">
+        <div id="chat-display"></div>
+        <input type="text" id="user-input" placeholder="Type your message...">
+        <button id="send-button" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        function sendMessage() {
+            var userMessage = document.getElementById('user-input').value;
+
+            // Check if userMessage is not empty before sending
+            if (userMessage.trim() !== '') {
+                document.getElementById('chat-display').innerHTML += '<p class="user-message">User: ' + userMessage + '</p>';
+                document.getElementById('user-input').value = '';
+
+                // Send user message to Django view
+                fetch('/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    body: 'user_input=' + encodeURIComponent(userMessage),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    var botResponse = data.response;
+                    document.getElementById('chat-display').innerHTML += '<p class="bot-message">Bot: ' + botResponse + '</p>';
+                });
+            }
+        }
+    </script>
+</body>
+</html>
